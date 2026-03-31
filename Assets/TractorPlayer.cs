@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class TractorPlayer : MonoBehaviour
@@ -11,10 +12,18 @@ public class TractorPlayer : MonoBehaviour
     private float _currentTime;
     private bool _isPlaying;
     private bool _fileLoaded;
+    private double _initialEasting;
+    private double _initialNorthing;
+    private float _initialTractorX;
+    private float _initialTractorZ;
 
     void Update()
     {
+#if ENABLE_INPUT_SYSTEM
+        if (UnityEngine.InputSystem.Keyboard.current.enterKey.wasPressedThisFrame)
+#else
         if (Input.GetKeyDown(KeyCode.Return))
+#endif
         {
             if (!_fileLoaded)
             {
@@ -35,7 +44,7 @@ public class TractorPlayer : MonoBehaviour
     private void LoadFile()
     {
         // Временно — путь вручную. Позже заменишь на FileBrowser.
-        string path = Application.dataPath + "/valtra_mls_20250515_1.txt";
+        string path = Application.dataPath + "/Data/valtra_mls_20250515_1.txt";
 
         _records = ValtraParser.Parse(path);
         if (_records.Count == 0)
@@ -44,6 +53,11 @@ public class TractorPlayer : MonoBehaviour
         _fileLoaded = true;
         _currentIndex = 0;
         _currentTime = _records[0].gpsTime;
+        _initialEasting = _records[0].easting;
+        _initialNorthing = _records[0].northing;
+        _initialTractorX = transform.position.x;
+        _initialTractorZ = transform.position.z;
+        Console.WriteLine("Start");
 
         SetPosition(_records[0].easting, _records[0].northing);
         _isPlaying = true;
@@ -69,15 +83,18 @@ public class TractorPlayer : MonoBehaviour
         SetPosition(e, n);
 
         if (_currentIndex >= _records.Count - 2 && _currentTime >= b.gpsTime)
+        {
             _isPlaying = false;
+            Console.WriteLine("Stop");
+        }
     }
 
     private void SetPosition(double e, double n)
     {
         transform.position = new Vector3(
-            (float)e * positionScale,
+            (float)(e - _initialEasting) * positionScale + _initialTractorX,
             transform.position.y,
-            (float)n * positionScale
+            (float)(n- _initialNorthing) * positionScale + _initialTractorZ
         );
     }
 }
