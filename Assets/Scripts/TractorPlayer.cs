@@ -1,17 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
+using ValtraIMU.Models;
 
 public class TractorPlayer : MonoBehaviour
 {
     public float playbackSpeed = 1f;
     public float positionScale = 1f;
 
-    private List<ValtraRecord> _records;
-    private int _currentIndex;
+    //private List<ValtraRecord> _records;
+    ValtraIMU.DataProviders.IMUDataProvider _imuDataProvider;
     private float _currentTime;
     private bool _isPlaying;
     private bool _fileLoaded;
+
     private double _initialEasting;
     private double _initialNorthing;
     private float _initialTractorX;
@@ -35,7 +35,7 @@ public class TractorPlayer : MonoBehaviour
             }
         }
 
-        if (_isPlaying && _records != null && _records.Count > 1)
+        if (_isPlaying && _imuDataProvider != null)
         {
             Play();
         }
@@ -43,23 +43,26 @@ public class TractorPlayer : MonoBehaviour
 
     private void LoadFile()
     {
-        // Временно — путь вручную. Позже заменишь на FileBrowser.
         string path = Application.dataPath + "/Data/valtra_mls_20250515_1.txt";
+        _imuDataProvider = ValtraIMU.DataProviders.IMUDataProvider.Create(path);
 
-        _records = ValtraParser.Parse(path);
-        if (_records.Count == 0)
+        if (_imuDataProvider == null)
+        {
+            Debug.LogError($"File not found: {path}");
             return;
+        }
 
         _fileLoaded = true;
-        _currentIndex = 0;
-        _currentTime = _records[0].gpsTime;
-        _initialEasting = _records[0].easting;
-        _initialNorthing = _records[0].northing;
+        _currentTime = 0;
+        
+        var firstRecord = _imuDataProvider.Current;
+        _initialEasting = firstRecord.Position.Easting;
+        _initialNorthing = firstRecord.Position.Northing;
         _initialTractorX = transform.position.x;
         _initialTractorZ = transform.position.z;
-        Console.WriteLine("Start");
 
-        SetPosition(_records[0].easting, _records[0].northing);
+        Debug.Log("Start");
+
         _isPlaying = true;
     }
 
@@ -67,26 +70,32 @@ public class TractorPlayer : MonoBehaviour
     {
         _currentTime += Time.deltaTime * playbackSpeed;
 
-        while (_currentIndex < _records.Count - 2 &&
-               _currentTime > _records[_currentIndex + 1].gpsTime)
+        IMUData a = _imuDataProvider.Current;
+        IMUData b = null;
+
+        while (true)
         {
-            _currentIndex++;
+            if (!_imuDataProvider.MoveNext())
+            {
+                _isPlaying = false;
+                Debug.Log("Stop");
+                return;
+            }
+
+            b = _imuDataProvider.Current;
+            if (_currentTime <= b.Time)
+            {
+                break;
+            }
+
+            b = a;
         }
 
-        var a = _records[_currentIndex];
-        var b = _records[_currentIndex + 1];
-
-        float t = Mathf.InverseLerp(a.gpsTime, b.gpsTime, _currentTime);
-        double e = Mathf.Lerp((float)a.easting, (float)b.easting, t);
-        double n = Mathf.Lerp((float)a.northing, (float)b.northing, t);
+        float t = Mathf.InverseLerp((float)a.Time, (float)b.Time, _currentTime);
+        double e = Mathf.Lerp((float)a.Position.Easting, (float)b.Position.Easting, t);
+        double n = Mathf.Lerp((float)a.Position.Northing, (float)b.Position.Northing, t);
 
         SetPosition(e, n);
-
-        if (_currentIndex >= _records.Count - 2 && _currentTime >= b.gpsTime)
-        {
-            _isPlaying = false;
-            Console.WriteLine("Stop");
-        }
     }
 
     private void SetPosition(double e, double n)
@@ -94,7 +103,7 @@ public class TractorPlayer : MonoBehaviour
         transform.position = new Vector3(
             (float)(e - _initialEasting) * positionScale + _initialTractorX,
             transform.position.y,
-            (float)(n- _initialNorthing) * positionScale + _initialTractorZ
+            (float)(n - _initialNorthing) * positionScale + _initialTractorZ
         );
     }
 }

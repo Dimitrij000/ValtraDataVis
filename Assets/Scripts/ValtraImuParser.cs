@@ -37,7 +37,7 @@ public static class ValtraParser
             {
                 var rec = new ValtraRecord
                 {
-                    gpsTime = float.Parse(cols[1].Trim(), ci),
+                    gpsTime = double.Parse(cols[1].Trim(), ci),
                     easting = double.Parse(cols[5].Trim(), ci),
                     northing = double.Parse(cols[6].Trim(), ci)
                 };
