@@ -29,7 +29,7 @@ public static class ValtraParser
                 continue;
 
             // Данные разделены символом |
-            var cols = line.Split('|');
+            var cols = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             if (cols.Length < 7)
                 continue;
 

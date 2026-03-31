@@ -35,7 +35,7 @@ public class TractorPlayer : MonoBehaviour
     private void LoadFile()
     {
         // Временно — путь вручную. Позже заменишь на FileBrowser.
-        string path = Application.dataPath + "/imu.txt";
+        string path = Application.dataPath + "/valtra_mls_20250515_1.txt";
 
         _records = ValtraParser.Parse(path);
         if (_records.Count == 0)
