@@ -5,28 +5,27 @@ using UnityEngine.InputSystem;
 public class FreeLookZoom : MonoBehaviour
 {
     [Header("Zoom Settings")]
-    public float zoomSpeed = 2f;
-    public float minRadius = 1f;
-    public float maxRadius = 10f;
+    public float zoomSpeed = 30f;
+    public float minRadius = 10f;
+    public float maxRadius = 50f;
 
     private float _zoomInput;
-    public CinemachineFreeLook _freeLookCamera;
+
+    private CinemachineOrbitalFollow _cameraOrbitalFollower;
 
     public void Awake()
     {
-        _freeLookCamera = FindObjectOfType<CinemachineFreeLook>();
+        _cameraOrbitalFollower = GetComponent<CinemachineOrbitalFollow>();
     }
 
     // Input System callback
-    public void OnZoom(InputAction.CallbackContext context)
+    public void OnZoom(InputValue value)
     {
-        _zoomInput = context.ReadValue<float>();
+        _zoomInput = value.Get<Vector2>().y;
     }
 
     private void Update()
     {
-        if (_freeLookCamera == null) return;
-
         if (Mathf.Abs(_zoomInput) > 0.01f)
         {
             AdjustRigRadius(_zoomInput * zoomSpeed * Time.deltaTime);
@@ -35,11 +34,8 @@ public class FreeLookZoom : MonoBehaviour
 
     private void AdjustRigRadius(float delta)
     {
-        for (int i = 0; i < 3; i++)
-        {
-            var rig = _freeLookCamera.m_Orbits[i];
-            rig.m_Radius = Mathf.Clamp(rig.m_Radius - delta, minRadius, maxRadius);
-            _freeLookCamera.m_Orbits[i] = rig;
-        }
+        var radius = _cameraOrbitalFollower.Radius;
+        radius = Mathf.Clamp(radius - delta, minRadius, maxRadius);
+        _cameraOrbitalFollower.Radius = radius;
     }
 }
