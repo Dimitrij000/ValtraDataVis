@@ -868,10 +868,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6345950f631305e458fe316e6a272ce5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::FreeLookZoom
-  zoomSpeed: 2
-  minRadius: 1
-  maxRadius: 10
-  _freeLookCamera: {fileID: 0}
+  zoomSpeed: 30
+  minRadius: 10
+  maxRadius: 70
 --- !u!114 &1769997992
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -896,10 +895,26 @@ MonoBehaviour:
   m_ControlsChangedEvent:
     m_PersistentCalls:
       m_Calls: []
-  m_ActionEvents: []
+  m_ActionEvents:
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1769997991}
+        m_TargetAssemblyTypeName: FreeLookZoom, Assembly-CSharp
+        m_MethodName: OnZoom
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 1
+    m_ActionId: ff36c989-6cf9-4a73-a913-70482361a90d
+    m_ActionName: 'Camera/Zoom[/Mouse/position]'
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
-  m_DefaultActionMap: Gameplay
+  m_DefaultActionMap: Camera
   m_SplitScreenIndex: -1
   m_Camera: {fileID: 0}
 --- !u!1 &1944528165
