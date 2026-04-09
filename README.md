@@ -1,0 +1,1 @@
+Before you run the player, download [data](https://drive.google.com/file/d/1SBz3bJOEPtFi0JkdZ6zTQTrrMtTMUgAe/view?usp=sharing) and extract it to `Assets` folder. Ensure that you have large text files in `Assets\Data`.
