@@ -3,10 +3,14 @@ using ValtraIMU.Models;
 
 public class TractorPlayer : MonoBehaviour
 {
+    [Header("Playback Settings")]
     public float playbackSpeed = 1f;
     public float positionScale = 1f;
 
-    ValtraIMU.DataProviders.IMUDataProvider _imuDataProvider;
+    [Header("Wheel Rotation")]
+    public WheelRotator wheelRotator;
+
+    private ValtraIMU.DataProviders.IMUDataProvider _imuDataProvider;
     private float _currentTime;
     private bool _isPlaying;
     private bool _fileLoaded;
@@ -15,6 +19,8 @@ public class TractorPlayer : MonoBehaviour
     private double _initialNorthing;
     private float _initialTractorX;
     private float _initialTractorZ;
+
+    private float _speed;
 
     void Update()
     {
@@ -97,6 +103,26 @@ public class TractorPlayer : MonoBehaviour
 
         SetPosition(e, n);
         SetRotation(a, b, t);
+
+        // ---------------------------------------------------
+        // ВЫЧИСЛЕНИЕ СКОРОСТИ ПО IMU (правильный способ)
+        // ---------------------------------------------------
+        double de = b.Position.Easting - a.Position.Easting;
+        double dn = b.Position.Northing - a.Position.Northing;
+        double dt = b.Time - a.Time; // миллисекунды
+
+        if (dt > 0)
+        {
+            double dist = Mathf.Sqrt((float)(de * de + dn * dn));
+            _speed = (float)(dist / (dt / 1000.0)); // м/с
+        }
+        else
+        {
+            _speed = 0;
+        }
+
+        if (wheelRotator != null)
+            wheelRotator.SetSpeed(_speed);
     }
 
     private void SetPosition(double e, double n)
@@ -110,22 +136,15 @@ public class TractorPlayer : MonoBehaviour
 
     private void SetRotation(IMUData a, IMUData b, float t)
     {
-        // Интерполяция углов IMU
         double roll = Mathf.Lerp((float)a.Orientation.Roll, (float)b.Orientation.Roll, t);
         double pitch = Mathf.Lerp((float)a.Orientation.Pitch, (float)b.Orientation.Pitch, t);
         double heading = Mathf.Lerp((float)a.Orientation.Heading, (float)b.Orientation.Heading, t);
 
-        // Создание Quaternion из IMU углов
         Quaternion imuRot = Quaternion.Euler(
-            (float)pitch,      // X
-            (float)heading,    // Y (Heading = Yaw)
-            (float)roll        // Z
+            (float)pitch,
+            (float)heading,
+            (float)roll
         );
-
-        // Если трактор смотрит не туда — раскомментируй одну из строк:
-        // imuRot *= Quaternion.Euler(0, 90, 0);
-        // imuRot *= Quaternion.Euler(0, -90, 0);
-        // imuRot *= Quaternion.Euler(180, 0, 0);
 
         transform.rotation = imuRot;
     }
