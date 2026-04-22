@@ -10,6 +10,10 @@ public class TractorPlayer : MonoBehaviour
     [Header("Wheel Rotation")]
     public WheelRotator wheelRotator;
 
+    [Header("UI Gauges")]
+    public SpeedGauge speedGauge;      // СПИДОМЕТР
+    public CompassGauge compassGauge;  // КОМПАС
+
     private ValtraIMU.DataProviders.IMUDataProvider _imuDataProvider;
     private float _currentTime;
     private bool _isPlaying;
@@ -21,6 +25,7 @@ public class TractorPlayer : MonoBehaviour
     private float _initialTractorZ;
 
     private float _speed;
+    private float _heading;
 
     void Update()
     {
@@ -105,7 +110,7 @@ public class TractorPlayer : MonoBehaviour
         SetRotation(a, b, t);
 
         // ---------------------------------------------------
-        // ВЫЧИСЛЕНИЕ СКОРОСТИ ПО IMU (правильный способ)
+        // ВЫЧИСЛЕНИЕ СКОРОСТИ ПО IMU
         // ---------------------------------------------------
         double de = b.Position.Easting - a.Position.Easting;
         double dn = b.Position.Northing - a.Position.Northing;
@@ -121,8 +126,21 @@ public class TractorPlayer : MonoBehaviour
             _speed = 0;
         }
 
+        // Обновление вращения колёс
         if (wheelRotator != null)
             wheelRotator.SetSpeed(_speed);
+
+        // ---------------------------------------------------
+        // ОБНОВЛЕНИЕ СПИДОМЕТРА (км/ч)
+        // ---------------------------------------------------
+        if (speedGauge != null)
+            speedGauge.SetSpeed(_speed * 3.6f / 1000);
+
+        // ---------------------------------------------------
+        // ОБНОВЛЕНИЕ КОМПАСА
+        // ---------------------------------------------------
+        if (compassGauge != null)
+            compassGauge.SetHeading(_heading);
     }
 
     private void SetPosition(double e, double n)
@@ -139,6 +157,8 @@ public class TractorPlayer : MonoBehaviour
         double roll = Mathf.Lerp((float)a.Orientation.Roll, (float)b.Orientation.Roll, t);
         double pitch = Mathf.Lerp((float)a.Orientation.Pitch, (float)b.Orientation.Pitch, t);
         double heading = Mathf.Lerp((float)a.Orientation.Heading, (float)b.Orientation.Heading, t);
+
+        _heading = (float)heading; // сохраняем для компаса
 
         Quaternion imuRot = Quaternion.Euler(
             (float)pitch,
