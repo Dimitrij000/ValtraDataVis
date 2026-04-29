@@ -9,8 +9,9 @@ public class WheelRotator : MonoBehaviour
     public Transform rearRight;
 
     [Header("Wheel settings")]
-    public float wheelRadius = 0.4f; // подстрой если нужно
-    public float rotationMultiplier = 1f; // тонкая настройка
+    public float frontWheelRadius = 0.25f;
+    public float rearWheelRadius = 0.4f;
+    public float rotationMultiplier = 0.0001f;
 
     private float currentSpeed = 0f;
 
@@ -21,20 +22,25 @@ public class WheelRotator : MonoBehaviour
 
     void Update()
     {
+        RotateWheels(frontWheelRadius, new Transform[] { frontLeft, frontRight });
+        RotateWheels(rearWheelRadius, new Transform[] { rearLeft, rearRight });
+    }
+
+    void RotateWheels(float wheelRadius, Transform[] wheels)
+    {
         float angularSpeed = (currentSpeed / wheelRadius) * Mathf.Rad2Deg;
         float rotationAmount = angularSpeed * Time.deltaTime * rotationMultiplier;
 
-        RotateWheel(frontLeft, rotationAmount);
-        RotateWheel(frontRight, rotationAmount);
-        RotateWheel(rearLeft, rotationAmount);
-        RotateWheel(rearRight, rotationAmount);
+        foreach (Transform wheel in wheels)
+        {
+            RotateWheel(wheel, rotationAmount);
+        }
     }
 
     private void RotateWheel(Transform wheel, float amount)
     {
         if (wheel == null) return;
 
-        // вращение вокруг оси X
         wheel.Rotate(amount, 0f, 0f, Space.Self);
     }
 }

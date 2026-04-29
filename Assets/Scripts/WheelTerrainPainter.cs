@@ -3,7 +3,7 @@
 public class WheelTerrainPainter : MonoBehaviour
 {
     public Terrain terrain;
-    public int textureIndex = 1; // индекс текстуры грязи в Terrain Layer
+    public int textureIndex = 1; // in Terrain Layer
     public float brushSize = 1.0f;
     public float brushStrength = 0.5f;
 
@@ -41,10 +41,10 @@ public class WheelTerrainPainter : MonoBehaviour
             {
                 for (int z = 0; z < size; z++)
                 {
-                    // уменьшаем траву
+                    // decrease grass
                     splat[x, z, 0] *= (1f - brushStrength);
 
-                    // добавляем грязь
+                    // add mud
                     splat[x, z, textureIndex] += brushStrength;
                 }
             }

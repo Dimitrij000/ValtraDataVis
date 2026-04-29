@@ -11,8 +11,8 @@ public class TractorPlayer : MonoBehaviour
     public WheelRotator wheelRotator;
 
     [Header("UI Gauges")]
-    public SpeedGauge speedGauge;      // СПИДОМЕТР
-    public CompassGauge compassGauge;  // КОМПАС
+    public SpeedGauge speedGauge;
+    public CompassGauge compassGauge;
 
     private ValtraIMU.DataProviders.IMUDataProvider _imuDataProvider;
     private float _currentTime;
@@ -110,11 +110,11 @@ public class TractorPlayer : MonoBehaviour
         SetRotation(a, b, t);
 
         // ---------------------------------------------------
-        // ВЫЧИСЛЕНИЕ СКОРОСТИ ПО IMU
+        // IMU-based speed calculation
         // ---------------------------------------------------
         double de = b.Position.Easting - a.Position.Easting;
         double dn = b.Position.Northing - a.Position.Northing;
-        double dt = b.Time - a.Time; // миллисекунды
+        double dt = b.Time - a.Time;
 
         if (dt > 0)
         {
@@ -126,19 +126,12 @@ public class TractorPlayer : MonoBehaviour
             _speed = 0;
         }
 
-        // Обновление вращения колёс
         if (wheelRotator != null)
             wheelRotator.SetSpeed(_speed);
 
-        // ---------------------------------------------------
-        // ОБНОВЛЕНИЕ СПИДОМЕТРА (км/ч)
-        // ---------------------------------------------------
         if (speedGauge != null)
             speedGauge.SetSpeed(_speed * 3.6f / 1000);
 
-        // ---------------------------------------------------
-        // ОБНОВЛЕНИЕ КОМПАСА
-        // ---------------------------------------------------
         if (compassGauge != null)
             compassGauge.SetHeading(_heading);
     }
@@ -158,7 +151,7 @@ public class TractorPlayer : MonoBehaviour
         double pitch = Mathf.Lerp((float)a.Orientation.Pitch, (float)b.Orientation.Pitch, t);
         double heading = Mathf.Lerp((float)a.Orientation.Heading, (float)b.Orientation.Heading, t);
 
-        _heading = (float)heading; // сохраняем для компаса
+        _heading = (float)heading;
 
         Quaternion imuRot = Quaternion.Euler(
             (float)pitch,

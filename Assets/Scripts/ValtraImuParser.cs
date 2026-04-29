@@ -15,7 +15,6 @@ public static class ValtraParser
 
         foreach (var line in lines)
         {
-            // Ищем строку с заголовками
             if (!headerFound)
             {
                 if (line.Contains("GPSTime") && line.Contains("Easting") && line.Contains("Northing"))
@@ -28,7 +27,6 @@ public static class ValtraParser
             if (string.IsNullOrWhiteSpace(line))
                 continue;
 
-            // Данные разделены символом |
             var cols = line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             if (cols.Length < 7)
                 continue;
@@ -46,7 +44,6 @@ public static class ValtraParser
             }
             catch
             {
-                // пропускаем строки, которые не парсятся
                 continue;
             }
         }
